@@ -3,499 +3,695 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamics 365 CRM Super Prototype</title>
+  <title>Dynamics 365 CRM Clickable Prototype</title>
   <style>
     :root {
-      --blue: #0f6cbd; --bg: #f5f7fb; --panel:#fff; --line:#d8d8d8; --txt:#1f1f1f;
-      --ok:#107c10; --warn:#986f0b; --bad:#a80000;
+      --ms-blue: #0f6cbd;
+      --border: #d8d8d8;
+      --bg: #f5f7fb;
+      --panel: #fff;
+      --text: #1f1f1f;
+      --success: #107c10;
+      --warning: #986f0b;
+      --danger: #a80000;
     }
+
     * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI", Tahoma, sans-serif; background:var(--bg); color:var(--txt); }
-    .top { height:48px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
-    .top .title { display:flex; gap:10px; align-items:center; font-weight:600; }
-    .badge { font-size:12px; padding:3px 7px; border-radius:4px; background:rgba(255,255,255,.2); }
-    .shell { display:grid; grid-template-columns:260px 1fr; min-height:calc(100vh - 48px); }
-    .left { background:#f2f2f2; border-right:1px solid var(--line); padding:12px; }
-    .group { margin-bottom:14px; }
-    .group h4 { margin:8px; font-size:12px; color:#666; text-transform:uppercase; }
-    .nav { display:block; text-decoration:none; color:#222; padding:8px 10px; border-radius:4px; font-size:14px; }
-    .nav:hover,.nav.active { background:#e4eef9; color:#0b4f8a; font-weight:600; }
-    .main { display:flex; flex-direction:column; }
-    .bar { background:#fff; border-bottom:1px solid var(--line); padding:8px; display:flex; gap:8px; flex-wrap:wrap; }
-    .btn { border:1px solid var(--line); background:#fff; padding:7px 10px; border-radius:2px; font-size:13px; cursor:pointer; }
-    .btn.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
-    .btn.ok { color:var(--ok); border-color:#b6e0b6; }
-    .btn.bad { color:var(--bad); border-color:#f0b3b3; }
-    .head { background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; justify-content:space-between; font-size:13px; }
-    .pill { margin-left:8px; padding:4px 8px; border-radius:10px; font-size:12px; font-weight:600; }
-    .draft { background:#e1f0ff; color:#0b4f8a; } .submitted { background:#fff4ce; color:var(--warn); }
-    .approved { background:#dff6dd; color:var(--ok); } .rejected { background:#fde7e9; color:var(--bad); }
-    .body { padding:16px; display:grid; grid-template-columns:2fr 1fr; gap:16px; }
-    .card { background:var(--panel); border:1px solid var(--line); border-radius:4px; overflow:hidden; }
-    .card h3 { margin:0; padding:10px 12px; border-bottom:1px solid var(--line); font-size:14px; background:#fafafa; }
-    .tabs { display:flex; border-bottom:1px solid var(--line); }
-    .tab { border:0; background:transparent; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; }
-    .tab.active { color:var(--blue); border-bottom-color:var(--blue); font-weight:600; }
-    .panel { display:none; } .panel.active { display:block; }
-    .section { padding:12px; border-bottom:1px solid #eee; }
-    .section h5 { margin:0 0 10px; font-size:13px; color:#444; }
-    .grid2 { display:grid; grid-template-columns:repeat(2,minmax(180px,1fr)); gap:10px 12px; }
-    .field { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#555; }
-    input,select,textarea { border:1px solid var(--line); border-radius:2px; padding:6px 8px; font-size:13px; background:#fff; }
-    input,select { height:31px; }
-    textarea { min-height:64px; resize:vertical; }
-    .lookup { display:grid; grid-template-columns:1fr 30px; gap:6px; }
-    .lk { border:1px solid var(--line); background:#f8f8f8; cursor:pointer; }
-    .subtools { padding:10px 12px; border-bottom:1px solid var(--line); display:flex; gap:8px; }
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-    th,td { text-align:left; padding:8px; border-bottom:1px solid #eee; }
-    th { background:#fafafa; cursor:pointer; }
-    tr.row:hover { background:#f4f9ff; cursor:pointer; }
-    .notice { padding:8px 12px; background:#f8fbff; border-top:1px solid var(--line); font-size:12px; }
-    .timeline { padding:12px; display:grid; gap:8px; font-size:12px; }
-    .event { padding:8px; border:1px solid #e5e5e5; border-radius:4px; background:#fff; }
-    .kpi { padding:12px; display:grid; gap:12px; }
-    .bars { display:grid; gap:8px; }
-    .brow { display:grid; grid-template-columns:100px 1fr 30px; gap:8px; font-size:12px; align-items:center; }
-    .barwrap { height:14px; border-radius:4px; overflow:hidden; background:#e9eff5; }
-    .fill { height:100%; background:var(--blue); }
-    .pie { width:180px; height:180px; border-radius:50%; margin:auto; border:1px solid var(--line); background:conic-gradient(#0f6cbd 0 40%, #80b9e4 40% 70%, #c9e2f7 70% 100%); }
-    .legend { font-size:12px; display:grid; gap:6px; }
-    .legend span { display:inline-block; width:10px; height:10px; margin-right:6px; border-radius:2px; }
-    .views { display:none; } .views.active { display:block; }
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:99; }
-    .modal { width:min(640px,90vw); background:#fff; border-radius:8px; border:1px solid var(--line); overflow:hidden; }
-    .modal h4 { margin:0; background:#fafafa; padding:10px 12px; border-bottom:1px solid var(--line); }
-    .modal .content { padding:12px; }
-    .modal .actions { padding:10px 12px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:8px; }
-    .chips { display:flex; flex-wrap:wrap; gap:6px; }
-    .chip { font-size:11px; border:1px solid var(--line); border-radius:10px; padding:3px 8px; background:#fafafa; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .top-header {
+      height: 48px;
+      background: var(--ms-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 14px;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .header-badge {
+      background: rgba(255, 255, 255, .22);
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-size: 12px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: calc(100vh - 48px);
+    }
+
+    .left-nav {
+      background: #f2f2f2;
+      border-right: 1px solid var(--border);
+      padding: 14px 10px;
+    }
+
+    .nav-section {
+      margin-bottom: 16px;
+    }
+
+    .nav-title {
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin: 8px;
+    }
+
+    .nav-link {
+      display: block;
+      width: 100%;
+      text-decoration: none;
+      color: #222;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .nav-link.active,
+    .nav-link:hover {
+      background: #e4eef9;
+      color: #0b4f8a;
+      font-weight: 600;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .command-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 2px;
+      padding: 7px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn.primary { background: var(--ms-blue); color: #fff; border-color: var(--ms-blue); }
+    .btn.success { border-color: #b7dfb7; color: var(--success); }
+    .btn.danger { border-color: #efb3b3; color: var(--danger); }
+
+    .entity-view {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .status-pill {
+      margin-left: 8px;
+      border-radius: 10px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .draft { background: #e1f0ff; color: #0b4f8a; }
+    .submitted { background: #fff4ce; color: var(--warning); }
+    .approved { background: #dff6dd; color: var(--success); }
+    .rejected { background: #fde7e9; color: var(--danger); }
+
+    .content {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .card-title {
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .views { display: none; }
+    .views.active { display: block; }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      padding: 10px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--ms-blue);
+      border-bottom-color: var(--ms-blue);
+      font-weight: 600;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .section {
+      padding: 12px;
+      border-bottom: 1px solid #efefef;
+    }
+
+    .section h4 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: #444;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(180px, 1fr));
+      gap: 10px 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    input, select {
+      height: 31px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 5px 8px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .lookup-wrap {
+      display: grid;
+      grid-template-columns: 1fr 30px;
+      gap: 6px;
+    }
+
+    .lookup-btn {
+      border: 1px solid var(--border);
+      background: #f8f8f8;
+      cursor: pointer;
+    }
+
+    .notice {
+      border-top: 1px solid var(--border);
+      background: #f8fbff;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #444;
+    }
+
+    .grid-tools {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #eee;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #fafafa;
+      cursor: pointer;
+    }
+
+    tr.clickable-row { cursor: pointer; }
+    tr.clickable-row:hover { background: #f4f9ff; }
+
+    .dashboard {
+      padding: 12px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .bars { display: grid; gap: 8px; }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 28px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .bar {
+      height: 14px;
+      background: #e9eff5;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .fill { height: 100%; background: var(--ms-blue); }
+
+    .pie {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      margin: auto;
+      border: 1px solid var(--border);
+      background: conic-gradient(#0f6cbd 0 45%, #80b9e4 45% 75%, #c9e2f7 75% 100%);
+    }
+
+    .legend { display: grid; gap: 6px; font-size: 12px; }
+    .legend span { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; }
+
+    .workflow {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      background: #fafafa;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
-  <header class="top">
-    <div class="title"><span>☰</span><span>Dynamics 365 CRM</span><span class="badge">AI Super Prototype</span></div>
-    <div>Rapid feature ideation playground</div>
+  <header class="top-header">
+    <div class="header-title">
+      <span>☰</span>
+      <span>Dynamics 365 CRM</span>
+      <span class="header-badge">Clickable Prototype</span>
+    </div>
+    <div>AI Rapid Prototyping Demo</div>
   </header>
 
-  <div class="shell">
-    <aside class="left">
-      <div class="group">
-        <h4>Entities</h4>
-        <a class="nav" href="#entity/asset-applications">Asset Applications</a>
-        <a class="nav" href="#entity/clients">Clients</a>
-        <a class="nav" href="#entity/accounts">Accounts</a>
-        <a class="nav" href="#entity/approvals">Approvals</a>
-        <a class="nav" href="#entity/advisors">Advisors</a>
-        <a class="nav" href="#entity/compliance-cases">Compliance Cases</a>
-        <a class="nav" href="#entity/tasks">Tasks</a>
+  <div class="layout">
+    <aside class="left-nav">
+      <div class="nav-section">
+        <div class="nav-title">Entities</div>
+        <a class="nav-link" href="#entity/asset-applications">Asset Applications</a>
+        <a class="nav-link" href="#entity/clients">Clients</a>
+        <a class="nav-link" href="#entity/accounts">Accounts</a>
+        <a class="nav-link" href="#entity/approvals">Approvals</a>
       </div>
-      <div class="group">
-        <h4>Workspaces</h4>
-        <a class="nav" href="#view/form">Record Form</a>
-        <a class="nav" href="#view/grid">Related Records</a>
-        <a class="nav" href="#view/approval">Approval Desk</a>
-        <a class="nav" href="#view/dashboard">Dashboard</a>
-      </div>
-      <div class="group">
-        <h4>Quick Actions</h4>
-        <a class="nav" href="#action/new-client">+ New Client Wizard</a>
-        <a class="nav" href="#action/bulk-approve">⚡ Bulk Approve Queue</a>
+
+      <div class="nav-section">
+        <div class="nav-title">Sections</div>
+        <a class="nav-link" href="#view/form">Record Form</a>
+        <a class="nav-link" href="#view/grid">Related Records</a>
+        <a class="nav-link" href="#view/dashboard">Dashboard</a>
       </div>
     </aside>
 
     <main class="main">
-      <div class="bar">
+      <div class="command-bar">
         <button class="btn primary" onclick="saveRecord()">Save</button>
         <button class="btn" onclick="saveAndClose()">Save &amp; Close</button>
         <button class="btn" onclick="setState('Submitted')">Submit</button>
-        <button class="btn ok" onclick="setState('Approved')">Approve</button>
-        <button class="btn bad" onclick="setState('Rejected')">Reject</button>
+        <button class="btn success" onclick="setState('Approved')">Approve</button>
+        <button class="btn danger" onclick="setState('Rejected')">Reject</button>
         <button class="btn" onclick="newRecord()">New</button>
-        <button class="btn" onclick="openTaskPopup()">Create Task</button>
-        <button class="btn" onclick="openCompliancePopup()">Check Compliance</button>
         <button class="btn" onclick="window.print()">Print</button>
+        <button class="btn" onclick="checkCompliance()">Check Compliance</button>
       </div>
 
-      <div class="head">
-        <div><span id="entityLabel">Asset Application</span>: <strong id="recordId">AA-2026-00117</strong> <span id="statusPill" class="pill draft">Draft</span></div>
-        <div id="meta">Asset Application • Form • Prototype mode</div>
+      <div class="entity-view">
+        <div>
+          <span id="entityLabel">Asset Application</span>: <strong id="recordId">AA-2026-00117</strong>
+          <span class="status-pill draft" id="statusPill">Draft</span>
+        </div>
+        <div id="metaInfo">Asset Applications • Record Form • Prototype mode</div>
       </div>
 
-      <div class="body">
+      <div class="content">
         <section class="card">
           <div id="view-form" class="views active">
             <div class="tabs">
               <button class="tab active" data-tab="general">General</button>
-              <button class="tab" data-tab="financial">Financial</button>
+              <button class="tab" data-tab="details">Details</button>
               <button class="tab" data-tab="approval">Approval</button>
-              <button class="tab" data-tab="related">Related</button>
             </div>
 
-            <div id="panel-general" class="panel active">
+            <div class="tab-panel active" id="panel-general">
               <div class="section">
-                <h5>Core Information</h5>
-                <div class="grid2">
-                  <label class="field">Application Name<input id="appName" data-editable="true" value="Global Equity Allocation 2026" /></label>
-                  <label class="field">Application Status (Option Set)
-                    <select id="statusSelect" data-editable="true" onchange="setState(this.value)"><option>Draft</option><option>Submitted</option><option>Approved</option><option>Rejected</option></select>
+                <h4>Application Information</h4>
+                <div class="form-grid">
+                  <label class="field">Application Name
+                    <input id="applicationName" data-editable="true" type="text" value="Global Equity Allocation 2026" />
                   </label>
-                  <label class="field">Client (Lookup)<div class="lookup"><input data-editable="true" value="C-1002 Contoso Capital"/><button class="lk" onclick="openLookup('Client')">🔍</button></div></label>
-                  <label class="field">Account (Lookup)<div class="lookup"><input data-editable="true" value="A-771 Corporate Managed"/><button class="lk" onclick="openLookup('Account')">🔍</button></div></label>
-                  <label class="field">Asset (Lookup)<div class="lookup"><input data-editable="true" value="AST-44 Global Bond Basket"/><button class="lk" onclick="openLookup('Asset')">🔍</button></div></label>
-                  <label class="field">Advisor (Lookup)<div class="lookup"><input data-editable="true" value="ADV-09 Jenna Miller"/><button class="lk" onclick="openLookup('Advisor')">🔍</button></div></label>
-                  <label class="field">Requested Date<input data-editable="true" type="date" value="2026-03-10"/></label>
-                  <label class="field">Requested Amount (USD)<input data-editable="true" type="number" value="250000"/></label>
-                </div>
-              </div>
-              <div class="section">
-                <h5>Client Context</h5>
-                <div class="grid2">
-                  <label class="field">Risk Profile<select data-editable="true"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
-                  <label class="field">KYC Status<select data-editable="true"><option>Pending</option><option selected>Verified</option><option>Expired</option></select></label>
-                  <label class="field">Priority<select data-editable="true"><option>Normal</option><option>High</option><option>Urgent</option></select></label>
-                  <label class="field">Target Close Date<input data-editable="true" type="date" value="2026-03-30"/></label>
-                </div>
-              </div>
-            </div>
-
-            <div id="panel-financial" class="panel">
-              <div class="section">
-                <h5>Financial Fields</h5>
-                <div class="grid2">
-                  <label class="field">Asset Type<select data-editable="true"><option selected>Bond</option><option>Stock</option><option>ETF</option></select></label>
-                  <label class="field">Expected Return %<input data-editable="true" type="number" value="8.4"/></label>
-                  <label class="field">Tenor (Months)<input data-editable="true" type="number" value="24"/></label>
-                  <label class="field">Management Fee %<input data-editable="true" type="number" value="1.1"/></label>
-                  <label class="field">Currency<select data-editable="true"><option selected>USD</option><option>EUR</option><option>GBP</option></select></label>
-                  <label class="field">Investment Goal<select data-editable="true"><option>Income</option><option selected>Growth</option><option>Capital Preservation</option></select></label>
-                </div>
-              </div>
-              <div class="section">
-                <h5>Notes</h5>
-                <label class="field">Investment Rationale<textarea data-editable="true">Client seeks stable medium-risk allocation with fixed income anchor.</textarea></label>
-              </div>
-            </div>
-
-            <div id="panel-approval" class="panel">
-              <div class="section">
-                <h5>Approval Matrix</h5>
-                <div class="grid2">
-                  <label class="field">Primary Approver (Lookup)<div class="lookup"><input data-editable="true" value="APR-22 Alex Wilcox"/><button class="lk" onclick="openLookup('Approver')">🔍</button></div></label>
-                  <label class="field">Backup Approver (Lookup)<div class="lookup"><input data-editable="true" value="APR-31 Mei Wong"/><button class="lk" onclick="openLookup('Approver')">🔍</button></div></label>
-                  <label class="field">Compliance Result<select data-editable="true"><option>Pending</option><option>Passed</option><option>Failed</option></select></label>
-                  <label class="field">Approval SLA<select data-editable="true"><option>24h</option><option selected>48h</option><option>72h</option></select></label>
-                  <label class="field">Decision Date<input data-editable="true" type="date"/></label>
-                  <label class="field">Escalation Level<select data-editable="true"><option>None</option><option>L1 Manager</option><option>L2 Director</option></select></label>
+                  <label class="field">Application Status (Option Set)
+                    <select id="statusSelect" data-editable="true" onchange="setState(this.value)">
+                      <option>Draft</option>
+                      <option>Submitted</option>
+                      <option>Approved</option>
+                      <option>Rejected</option>
+                    </select>
+                  </label>
+                  <label class="field">Client (Lookup)
+                    <div class="lookup-wrap">
+                      <input data-editable="true" type="text" value="C-1002 Contoso Capital" />
+                      <button class="lookup-btn" onclick="openLookup('Client')">🔍</button>
+                    </div>
+                  </label>
+                  <label class="field">Account (Lookup)
+                    <div class="lookup-wrap">
+                      <input data-editable="true" type="text" value="A-771 Corporate Managed" />
+                      <button class="lookup-btn" onclick="openLookup('Account')">🔍</button>
+                    </div>
+                  </label>
+                  <label class="field">Asset (Lookup)
+                    <div class="lookup-wrap">
+                      <input data-editable="true" type="text" value="AST-44 Global Bond Basket" />
+                      <button class="lookup-btn" onclick="openLookup('Asset')">🔍</button>
+                    </div>
+                  </label>
+                  <label class="field">Requested Date
+                    <input data-editable="true" type="date" value="2026-03-10" />
+                  </label>
+                  <label class="field">Requested Amount (USD)
+                    <input data-editable="true" type="number" value="250000" />
+                  </label>
+                  <label class="field">Risk Profile (Option Set)
+                    <select data-editable="true"><option>Low</option><option selected>Medium</option><option>High</option></select>
+                  </label>
                 </div>
               </div>
             </div>
 
-            <div id="panel-related" class="panel">
+            <div class="tab-panel" id="panel-details">
               <div class="section">
-                <h5>Related Modules</h5>
-                <div class="chips">
-                  <span class="chip">Client Profile</span><span class="chip">Documents</span><span class="chip">Tasks</span><span class="chip">Activities</span><span class="chip">Approvals</span><span class="chip">Compliance Cases</span>
+                <h4>Financial & Regulatory Details</h4>
+                <div class="form-grid">
+                  <label class="field">Asset Type
+                    <select data-editable="true"><option>Stock</option><option selected>Bond</option><option>ETF</option></select>
+                  </label>
+                  <label class="field">Expected Return %
+                    <input data-editable="true" type="number" value="8.4" />
+                  </label>
+                  <label class="field">Tenor (Months)
+                    <input data-editable="true" type="number" value="24" />
+                  </label>
+                  <label class="field">Jurisdiction
+                    <select data-editable="true"><option selected>US</option><option>EU</option><option>APAC</option></select>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="panel-approval">
+              <div class="section">
+                <h4>Approval Details</h4>
+                <div class="form-grid">
+                  <label class="field">Approver (Lookup)
+                    <div class="lookup-wrap">
+                      <input data-editable="true" type="text" value="APR-22 Alex Wilcox" />
+                      <button class="lookup-btn" onclick="openLookup('Approval')">🔍</button>
+                    </div>
+                  </label>
+                  <label class="field">Decision Date
+                    <input data-editable="true" type="date" />
+                  </label>
+                  <label class="field">Compliance Result
+                    <select data-editable="true"><option>Pending</option><option>Passed</option><option>Failed</option></select>
+                  </label>
+                  <label class="field">Priority
+                    <select data-editable="true"><option>Normal</option><option>High</option><option>Urgent</option></select>
+                  </label>
                 </div>
               </div>
             </div>
           </div>
 
           <div id="view-grid" class="views">
-            <h3>Related Asset Applications (Subgrid)</h3>
-            <div class="subtools">
-              <input id="filter" placeholder="Filter by client/status" oninput="applyFilter()" />
-              <span style="font-size:12px;color:#666;align-self:center;">click row = open record</span>
+            <div class="card-title">Related Asset Applications (Subgrid)</div>
+            <div class="grid-tools">
+              <input id="filterInput" type="text" placeholder="Filter by client or status" oninput="applyFilter()" />
+              <span style="font-size:12px;color:#666;align-self:center;">Click row to open record form • Click header to sort</span>
             </div>
-            <table id="grid">
-              <thead><tr><th onclick="sortGrid(0)">Application #</th><th onclick="sortGrid(1)">Client</th><th onclick="sortGrid(2)">Status</th><th onclick="sortGrid(3)">Amount</th><th onclick="sortGrid(4)">Date</th></tr></thead>
+            <table id="relatedGrid">
+              <thead>
+                <tr>
+                  <th onclick="sortGrid(0)">Application #</th>
+                  <th onclick="sortGrid(1)">Client</th>
+                  <th onclick="sortGrid(2)">Status</th>
+                  <th onclick="sortGrid(3)">Amount</th>
+                  <th onclick="sortGrid(4)">Date</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr class="row" data-record="AA-2026-00110" onclick="openFromGrid(this)"><td>AA-2026-00110</td><td>Contoso Capital</td><td>Submitted</td><td>150000</td><td>2026-03-06</td></tr>
-                <tr class="row" data-record="AA-2026-00111" onclick="openFromGrid(this)"><td>AA-2026-00111</td><td>Alpine Wealth</td><td>Approved</td><td>98000</td><td>2026-03-07</td></tr>
-                <tr class="row" data-record="AA-2026-00112" onclick="openFromGrid(this)"><td>AA-2026-00112</td><td>Northwind Group</td><td>Draft</td><td>265000</td><td>2026-03-09</td></tr>
-                <tr class="row" data-record="AA-2026-00113" onclick="openFromGrid(this)"><td>AA-2026-00113</td><td>Contoso Capital</td><td>Rejected</td><td>70000</td><td>2026-03-09</td></tr>
-                <tr class="row" data-record="AA-2026-00114" onclick="openFromGrid(this)"><td>AA-2026-00114</td><td>Wingtip</td><td>Submitted</td><td>312000</td><td>2026-03-10</td></tr>
+                <tr class="clickable-row" data-record="AA-2026-00110" onclick="openRecordFromGrid(this)"><td>AA-2026-00110</td><td>Contoso Capital</td><td>Submitted</td><td>150000</td><td>2026-03-06</td></tr>
+                <tr class="clickable-row" data-record="AA-2026-00111" onclick="openRecordFromGrid(this)"><td>AA-2026-00111</td><td>Alpine Wealth</td><td>Approved</td><td>98000</td><td>2026-03-07</td></tr>
+                <tr class="clickable-row" data-record="AA-2026-00112" onclick="openRecordFromGrid(this)"><td>AA-2026-00112</td><td>Northwind Group</td><td>Draft</td><td>265000</td><td>2026-03-09</td></tr>
+                <tr class="clickable-row" data-record="AA-2026-00113" onclick="openRecordFromGrid(this)"><td>AA-2026-00113</td><td>Contoso Capital</td><td>Rejected</td><td>70000</td><td>2026-03-09</td></tr>
               </tbody>
             </table>
           </div>
 
-          <div id="view-approval" class="views">
-            <h3>Approval Desk</h3>
-            <div class="section">
-              <h5>Queue</h5>
-              <table id="approvalQueue">
-                <thead><tr><th>Record</th><th>Entity</th><th>Stage</th><th>SLA</th><th>Action</th></tr></thead>
-                <tbody>
-                  <tr><td>AA-2026-00110</td><td>Asset Application</td><td>Manager Review</td><td>6h</td><td><button class="btn ok" onclick="quickApprove('AA-2026-00110')">Approve</button></td></tr>
-                  <tr><td>CC-3321</td><td>Compliance Case</td><td>KYC Escalation</td><td>12h</td><td><button class="btn" onclick="openCompliancePopup('CC-3321')">Open</button></td></tr>
-                  <tr><td>CL-1009</td><td>Client</td><td>Onboarding</td><td>3h</td><td><button class="btn" onclick="openClientWizard()">Review</button></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <div id="view-dashboard" class="views">
-            <h3>Dashboard</h3>
-            <div class="kpi">
-              <div><strong style="font-size:13px;">Asset requests by status</strong>
+            <div class="card-title">Dashboard</div>
+            <div class="dashboard">
+              <div>
+                <strong style="font-size:13px;">Asset Requests by Status</strong>
                 <div class="bars">
-                  <div class="brow"><span>Draft</span><div class="barwrap"><div class="fill" style="width:32%"></div></div><span>16</span></div>
-                  <div class="brow"><span>Submitted</span><div class="barwrap"><div class="fill" style="width:56%"></div></div><span>28</span></div>
-                  <div class="brow"><span>Approved</span><div class="barwrap"><div class="fill" style="width:70%"></div></div><span>35</span></div>
-                  <div class="brow"><span>Rejected</span><div class="barwrap"><div class="fill" style="width:14%"></div></div><span>7</span></div>
+                  <div class="bar-row"><span>Draft</span><div class="bar"><div class="fill" style="width:30%"></div></div><span>12</span></div>
+                  <div class="bar-row"><span>Submitted</span><div class="bar"><div class="fill" style="width:50%"></div></div><span>20</span></div>
+                  <div class="bar-row"><span>Approved</span><div class="bar"><div class="fill" style="width:70%"></div></div><span>28</span></div>
+                  <div class="bar-row"><span>Rejected</span><div class="bar"><div class="fill" style="width:15%"></div></div><span>6</span></div>
                 </div>
               </div>
-              <div><strong style="font-size:13px;">Asset distribution by type</strong><div class="pie"></div>
+
+              <div>
+                <strong style="font-size:13px;">Asset Distribution by Type</strong>
+                <div class="pie"></div>
                 <div class="legend">
-                  <div><span style="background:#0f6cbd"></span>Stock 40%</div>
+                  <div><span style="background:#0f6cbd"></span>Stock 45%</div>
                   <div><span style="background:#80b9e4"></span>Bond 30%</div>
-                  <div><span style="background:#c9e2f7"></span>ETF/Cash 30%</div>
+                  <div><span style="background:#c9e2f7"></span>Cash 25%</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div id="workflow" class="section" style="font-size:13px;background:#fafafa;">Workflow State: Draft application. Fill required fields, then submit for approval.</div>
-          <div id="notice" class="notice">Ready. Explore entities, popups, and approval process.</div>
+          <div class="workflow" id="workflowNote">Workflow State: Draft application. Fill required fields, then submit for approval.</div>
+          <div class="notice" id="notice">Ready. Use left nav links to move across sections.</div>
         </section>
 
         <aside class="card">
-          <h3>Timeline & Activities</h3>
-          <div class="timeline" id="timeline">
-            <div class="event"><strong>10:42</strong> — Record created by AI assistant.</div>
-            <div class="event"><strong>10:48</strong> — Compliance pre-check passed.</div>
-            <div class="event"><strong>10:55</strong> — Manager requested more details.</div>
-          </div>
-          <h3>Possible AI-generated features</h3>
-          <div class="timeline">
-            <div class="event">Auto-fill form from call transcript.</div>
-            <div class="event">Approval risk scoring and SLA prediction.</div>
-            <div class="event">Bulk action simulator for queues.</div>
+          <div class="card-title">Workflow UI States</div>
+          <div class="dashboard">
+            <ul style="margin:0 0 0 16px;padding:0;font-size:12px;color:#555;line-height:1.7;">
+              <li>Draft application: all editable fields enabled.</li>
+              <li>Submitted application: fields switch to read-only.</li>
+              <li>Approval screen: approve/reject actions remain active.</li>
+              <li>Rejected: fields reopen for correction.</li>
+            </ul>
           </div>
         </aside>
       </div>
     </main>
   </div>
 
-  <div class="modal-bg" id="modalBg">
-    <div class="modal" id="modalBox">
-      <h4 id="modalTitle">Modal</h4>
-      <div class="content" id="modalContent"></div>
-      <div class="actions">
-        <button class="btn" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="confirmModal()">Confirm</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     let sortAsc = true;
-    let modalAction = null;
 
-    const entityMap = {
-      'asset-applications': { label: 'Asset Application', prefix: 'AA' },
-      clients: { label: 'Client', prefix: 'CL' },
-      accounts: { label: 'Account', prefix: 'AC' },
-      approvals: { label: 'Approval', prefix: 'APR' },
-      advisors: { label: 'Advisor', prefix: 'ADV' },
-      'compliance-cases': { label: 'Compliance Case', prefix: 'CC' },
-      tasks: { label: 'Task', prefix: 'TSK' }
+    const entityData = {
+      "asset-applications": { title: "Asset Application", idPrefix: "AA" },
+      clients: { title: "Client", idPrefix: "CL" },
+      accounts: { title: "Account", idPrefix: "AC" },
+      approvals: { title: "Approval", idPrefix: "APR" }
     };
 
-    function notice(msg) { document.getElementById('notice').textContent = msg; }
-    function addTimeline(msg) {
-      const item = document.createElement('div');
-      item.className = 'event';
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2, '0');
-      const mm = String(now.getMinutes()).padStart(2, '0');
-      item.innerHTML = `<strong>${hh}:${mm}</strong> — ${msg}`;
-      document.getElementById('timeline').prepend(item);
+    function setNotice(message) {
+      document.getElementById('notice').textContent = message;
     }
 
-    function setEditable(on) {
-      document.querySelectorAll('[data-editable="true"]').forEach((el) => el.disabled = !on);
-      document.querySelectorAll('.lk').forEach((el) => el.disabled = !on);
+    function setEditable(isEditable) {
+      document.querySelectorAll('[data-editable="true"]').forEach((el) => {
+        el.disabled = !isEditable;
+      });
+      document.querySelectorAll('.lookup-btn').forEach((btn) => {
+        btn.disabled = !isEditable;
+      });
     }
 
     function setState(state) {
       const pill = document.getElementById('statusPill');
-      document.getElementById('statusSelect').value = state;
-      pill.textContent = state;
-      pill.className = `pill ${state.toLowerCase()}`;
+      const select = document.getElementById('statusSelect');
+      const workflow = document.getElementById('workflowNote');
 
-      const map = {
+      pill.textContent = state;
+      pill.className = `status-pill ${state.toLowerCase()}`;
+      select.value = state;
+
+      const messages = {
         Draft: 'Workflow State: Draft application. Fill required fields, then submit for approval.',
-        Submitted: 'Workflow State: Submitted application. Waiting for approver + compliance checks.',
-        Approved: 'Workflow State: Approved. Ready for downstream processing and notifications.',
-        Rejected: 'Workflow State: Rejected. Returned for edit and resubmission.'
+        Submitted: 'Workflow State: Submitted application. Waiting for approver review and compliance checks.',
+        Approved: 'Workflow State: Approval screen completed. Application approved and ready for processing.',
+        Rejected: 'Workflow State: Approval screen completed. Application rejected and returned for edits.'
       };
-      document.getElementById('workflow').textContent = map[state] || map.Draft;
+      workflow.textContent = messages[state] || messages.Draft;
+
       setEditable(state === 'Draft' || state === 'Rejected');
-      notice(`State changed to ${state}.`);
-      addTimeline(`Status updated to ${state}.`);
+      setNotice(`State changed to ${state}.`);
     }
 
-    function saveRecord() { notice(`Saved ${document.getElementById('recordId').textContent}.`); addTimeline('Record saved.'); }
-    function saveAndClose() { notice('Saved and redirected to Related Records.'); location.hash = '#view/grid'; }
+    function saveRecord() {
+      setNotice(`Saved ${document.getElementById('recordId').textContent}.`);
+    }
+
+    function saveAndClose() {
+      setNotice('Saved and returned to Related Records section.');
+      location.hash = '#view/grid';
+    }
+
     function newRecord() {
       document.getElementById('recordId').textContent = 'AA-NEW-0001';
-      document.getElementById('appName').value = '';
+      document.getElementById('applicationName').value = '';
       setState('Draft');
       location.hash = '#view/form';
-      notice('New record created. Start typing in the form.');
-      addTimeline('New draft record opened.');
+      setNotice('New record opened. Click in fields and start typing.');
     }
 
-    function openLookup(name) {
-      openModal(`Lookup: ${name}`, `<p>Select a ${name} record (prototype popup).</p><p><strong>Tip:</strong> This can be connected to Dataverse search.</p>`, () => {
-        notice(`${name} lookup confirmed.`); addTimeline(`${name} lookup selection confirmed.`);
-      });
+    function checkCompliance() {
+      setNotice('Compliance check complete: No blocking issues found.');
     }
 
-    function openTaskPopup() {
-      openModal('Create Task', `
-        <div class="grid2">
-          <label class="field">Task Subject<input id="taskSubject" value="Follow-up call with client" /></label>
-          <label class="field">Due Date<input id="taskDue" type="date" value="2026-03-15" /></label>
-        </div>
-        <label class="field" style="margin-top:8px;">Description<textarea id="taskDesc">Discuss risk profile and confirm allocation split.</textarea></label>
-      `, () => {
-        const subj = document.getElementById('taskSubject')?.value || 'Task';
-        notice(`Task created: ${subj}`);
-        addTimeline(`Task created: ${subj}.`);
-      });
+    function openLookup(entity) {
+      setNotice(`${entity} lookup opened (prototype).`);
     }
 
-    function openCompliancePopup(caseId='NEW') {
-      openModal('Compliance Check', `
-        <p>Run checks for record <strong>${document.getElementById('recordId').textContent}</strong>.</p>
-        <label class="field">Rule Set
-          <select id="ruleSet"><option>Standard AML</option><option>Enhanced Due Diligence</option><option>Cross-border</option></select>
-        </label>
-        <label class="field" style="margin-top:8px;">Notes<textarea id="compNotes">No sanctions match found. Minor address mismatch only.</textarea></label>
-      `, () => {
-        const rs = document.getElementById('ruleSet')?.value;
-        notice(`Compliance run complete (${rs})${caseId !== 'NEW' ? ` for ${caseId}` : ''}.`);
-        addTimeline(`Compliance checks completed (${rs}).`);
-      });
-    }
-
-    function openClientWizard() {
-      openModal('New Client Wizard', `
-        <div class="grid2">
-          <label class="field">Client Name<input id="cwName" value="Fabrikam Holdings" /></label>
-          <label class="field">Client Type<select id="cwType"><option>Individual</option><option selected>Corporate</option></select></label>
-          <label class="field">Region<select id="cwRegion"><option>US</option><option>EU</option><option selected>APAC</option></select></label>
-          <label class="field">Source<select id="cwSource"><option>Referral</option><option selected>Relationship Manager</option><option>Campaign</option></select></label>
-        </div>
-      `, () => {
-        const name = document.getElementById('cwName')?.value;
-        notice(`Client wizard complete: ${name} created.`);
-        addTimeline(`New client created via wizard: ${name}.`);
-        location.hash = '#entity/clients';
-      });
-    }
-
-    function quickApprove(recordId) {
-      openModal('Quick Approve', `<p>Approve <strong>${recordId}</strong> directly from queue?</p>`, () => {
-        notice(`${recordId} approved from Approval Desk.`);
-        addTimeline(`${recordId} approved in Approval Desk.`);
-      });
-    }
-
-    function openModal(title, html, onConfirm) {
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('modalBg').style.display = 'flex';
-      modalAction = onConfirm;
-    }
-
-    function closeModal() {
-      document.getElementById('modalBg').style.display = 'none';
-      modalAction = null;
-    }
-
-    function confirmModal() {
-      if (modalAction) modalAction();
-      closeModal();
-    }
-
-    function activateTab(name) {
-      document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
-      document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === `panel-${name}`));
-      notice(`Tab changed: ${name}.`);
-    }
-
-    function setView(name) {
-      document.querySelectorAll('.views').forEach((v) => v.classList.toggle('active', v.id === `view-${name}`));
-    }
-
-    function sortGrid(col) {
-      const tbody = document.querySelector('#grid tbody');
+    function sortGrid(colIndex) {
+      const tbody = document.querySelector('#relatedGrid tbody');
       const rows = Array.from(tbody.querySelectorAll('tr'));
-      rows.sort((a,b) => {
-        const at = a.children[col].textContent.trim();
-        const bt = b.children[col].textContent.trim();
-        const an = Number(at), bn = Number(bt);
-        if (!Number.isNaN(an) && !Number.isNaN(bn)) return sortAsc ? an - bn : bn - an;
-        return sortAsc ? at.localeCompare(bt) : bt.localeCompare(at);
+      rows.sort((a, b) => {
+        const aText = a.children[colIndex].textContent.trim();
+        const bText = b.children[colIndex].textContent.trim();
+        const aNum = Number(aText);
+        const bNum = Number(bText);
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
+          return sortAsc ? aNum - bNum : bNum - aNum;
+        }
+        return sortAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
       });
       sortAsc = !sortAsc;
-      rows.forEach((r) => tbody.appendChild(r));
+      rows.forEach((row) => tbody.appendChild(row));
     }
 
     function applyFilter() {
-      const q = document.getElementById('filter').value.toLowerCase();
-      document.querySelectorAll('#grid tbody tr').forEach((r) => {
-        r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+      const query = document.getElementById('filterInput').value.toLowerCase();
+      document.querySelectorAll('#relatedGrid tbody tr').forEach((row) => {
+        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
       });
     }
 
-    function openFromGrid(row) {
-      document.getElementById('recordId').textContent = row.dataset.record;
-      setState(row.children[2].textContent.trim());
+    function openRecordFromGrid(row) {
+      const id = row.dataset.record;
+      const status = row.children[2].textContent.trim();
+      document.getElementById('recordId').textContent = id;
+      setState(status);
       location.hash = '#view/form';
-      notice(`Opened ${row.dataset.record} from subgrid.`);
+      setNotice(`Opened record ${id} from related records.`);
     }
 
-    function setEntity(key) {
-      const e = entityMap[key] || entityMap['asset-applications'];
-      document.getElementById('entityLabel').textContent = e.label;
-      const id = document.getElementById('recordId').textContent;
-      if (!id.startsWith(e.prefix)) document.getElementById('recordId').textContent = `${e.prefix}-1001`;
+    function activateTab(tabName) {
+      document.querySelectorAll('.tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.tab-panel').forEach((panel) => {
+        panel.classList.toggle('active', panel.id === `panel-${tabName}`);
+      });
+      setNotice(`Switched to ${tabName} tab.`);
     }
 
-    function markNav(hash) {
-      document.querySelectorAll('.nav').forEach((n) => n.classList.toggle('active', n.getAttribute('href') === hash));
+    function setView(viewName) {
+      document.querySelectorAll('.views').forEach((view) => {
+        view.classList.toggle('active', view.id === `view-${viewName}`);
+      });
     }
 
-    function route() {
+    function markActiveNav(hash) {
+      document.querySelectorAll('.nav-link').forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === hash);
+      });
+    }
+
+    function updateEntity(entityKey) {
+      const entity = entityData[entityKey] || entityData['asset-applications'];
+      document.getElementById('entityLabel').textContent = entity.title;
+      const currentId = document.getElementById('recordId').textContent;
+      if (!currentId.startsWith(entity.idPrefix)) {
+        document.getElementById('recordId').textContent = `${entity.idPrefix}-1001`;
+      }
+    }
+
+    function routeFromHash() {
       const hash = location.hash || '#view/form';
-      markNav(hash);
-      const [type, value] = hash.replace('#','').split('/');
+      const [type, value] = hash.replace('#', '').split('/');
+      markActiveNav(hash);
 
-      if (type === 'view') setView(value || 'form');
-      else if (type === 'entity') { setEntity(value); setView('form'); }
-      else if (type === 'action') {
-        if (value === 'new-client') openClientWizard();
-        if (value === 'bulk-approve') {
-          location.hash = '#view/approval';
-          notice('Opened Approval Desk for bulk decisions.');
-        }
-      } else setView('form');
+      if (type === 'view') {
+        setView(value || 'form');
+      } else if (type === 'entity') {
+        updateEntity(value || 'asset-applications');
+        setView('form');
+      } else {
+        setView('form');
+      }
 
-      const view = document.querySelector('.views.active')?.id.replace('view-','') || 'form';
-      document.getElementById('meta').textContent = `${document.getElementById('entityLabel').textContent} • ${view[0].toUpperCase()+view.slice(1)} • Prototype mode`;
+      const entityName = document.getElementById('entityLabel').textContent;
+      const viewName = document.querySelector('.views.active')?.id.replace('view-', '') || 'form';
+      document.getElementById('metaInfo').textContent = `${entityName} • ${viewName[0].toUpperCase() + viewName.slice(1)} • Prototype mode`;
     }
 
-    document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => activateTab(t.dataset.tab)));
-    window.addEventListener('hashchange', route);
-    document.getElementById('modalBg').addEventListener('click', (e) => { if (e.target.id === 'modalBg') closeModal(); });
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+    });
+
+    window.addEventListener('hashchange', routeFromHash);
 
     activateTab('general');
     setState('Draft');
-    route();
+    routeFromHash();
   </script>
 </body>
 </html>
